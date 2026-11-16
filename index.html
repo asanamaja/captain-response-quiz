@@ -2,12 +2,16 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>선장 대응 훈련</title>
 <style>
-:root{--bg:#0b1624;--card:#13243a;--line:#26405f;--tx:#e8f0fa;--mu:#9bb2cc;--ok:#3ecf8e;--no:#ff6b6b;--ac:#4aa8ff}
+:root{--bg:#0b1624;--card:#13243a;--line:#26405f;--tx:#e8f0fa;--mu:#9bb2cc;--ok:#3ecf8e;--no:#ff6b6b;--ac:#4aa8ff;--wa:#ffb84a}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,"Malgun Gothic",sans-serif}
-main{max-width:640px;margin:0 auto;padding:16px}
-h1{font-size:22px;margin:8px 0}.badge{display:inline-block;font-size:12px;border:1px solid var(--ac);color:var(--ac);border-radius:99px;padding:2px 10px}
+main{max-width:980px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:8px 0}.badge{display:inline-block;font-size:12px;border:1px solid var(--ac);color:var(--ac);border-radius:99px;padding:2px 10px;margin-right:6px}
 .bar{display:flex;justify-content:space-between;gap:8px;margin:12px 0;font-weight:700}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:12px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.scene{padding:0;overflow:hidden}.scene svg{display:block;width:100%;height:auto}
+.cap{padding:8px 14px;font-size:12px;color:var(--mu);border-top:1px solid var(--line)}
 .sc{color:var(--ac);font-size:13px;font-weight:700}.q{font-size:20px;font-weight:700;margin:6px 0 14px}
 button{width:100%;text-align:left;background:#0f1d30;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin:8px 0;font:inherit;cursor:pointer}
 button:hover:not(:disabled){border-color:var(--ac)}button:disabled{cursor:default}
@@ -15,23 +19,56 @@ button:hover:not(:disabled){border-color:var(--ac)}button:disabled{cursor:defaul
 .next{background:var(--ac);color:#04121f;text-align:center;font-weight:700;border:0}
 .fb{margin-top:10px;color:var(--mu);font-size:14px}.note{color:var(--mu);font-size:12px;margin-top:18px}
 .big{font-size:44px;text-align:center;margin:6px 0}
+.sea{animation:wave 4s ease-in-out infinite alternate}.ship{animation:bob 3s ease-in-out infinite;transform-origin:200px 215px}
+.sweep{transform-origin:200px 150px;animation:spin 3s linear infinite}.blink{animation:blink 1s steps(2) infinite}.blink2{animation:blink 1.7s steps(2) infinite}
+.jit{animation:jit .35s linear infinite}.jump{animation:jump 3.2s ease-in-out infinite}.drift{animation:drift 3s ease-in-out infinite}
+.pulse{animation:pulse 1.4s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.fly{animation:fly 3s linear infinite}.fly1{animation:fly 3s linear infinite 1s}.fly2{animation:fly 3s linear infinite 2s}
+.in{animation:fall 3.5s ease-in-out infinite}.grow{animation:grow 3s linear infinite;transform-origin:left center;transform-box:fill-box}
+.scr{animation:scr 4s linear infinite}.fade{animation:fade 3s ease-in-out infinite}
+@keyframes wave{to{transform:translateX(-14px)}}@keyframes bob{50%{transform:translateY(-6px) rotate(1.5deg)}}
+@keyframes spin{to{transform:rotate(360deg)}}@keyframes blink{50%{opacity:.12}}
+@keyframes jit{25%{transform:translate(3px,-2px)}50%{transform:translate(-3px,2px)}75%{transform:translate(2px,3px)}}
+@keyframes jump{0%,35%{transform:translate(0,0)}50%,85%{transform:translate(70px,-40px)}100%{transform:translate(0,0)}}
+@keyframes drift{50%{transform:translateX(30px)}}@keyframes pulse{50%{transform:scale(1.25);opacity:.55}}
+@keyframes fly{0%{transform:translate(0,0);opacity:0}15%{opacity:1}100%{transform:translate(var(--dx,120px),var(--dy,0));opacity:0}}
+@keyframes fall{0%{transform:translateY(-70px);opacity:0}35%,75%{transform:translateY(0);opacity:1}100%{opacity:0}}
+@keyframes grow{0%{transform:scaleX(.1)}100%{transform:scaleX(1)}}@keyframes scr{to{transform:translateY(-60px)}}
+@keyframes fade{50%{opacity:.25}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
 </style></head><body><main>
-<h1>⚓ 선장 대응 훈련</h1><span class="badge">가상훈련(H) · 실제 사건 아님</span>
+<h1>⚓ 선장 대응 훈련</h1><span class="badge">가상훈련(H)</span><span class="badge">실제 사건 아님</span>
 <div class="bar"><span id="hp"></span><span id="sc"></span><span id="cb"></span></div>
 <div id="stage"></div>
-<p class="note">모든 문제는 코드에 고정된 9개 가상 훈련 문항입니다. 개별 사고에서 만든 것이 아니며 사실 확인·전문가 검수를 거치지 않았습니다. 실제 대응은 회사 SMS와 승인된 안전절차가 우선입니다. 문제가 9개뿐이라 반복하면 정답을 외우게 됩니다.</p>
+<p class="note">모든 문제는 코드에 고정된 9개 가상 훈련 문항이고, 장면은 이해를 돕는 도식입니다. 개별 사고에서 만든 것이 아니며 사실 확인·전문가 검수를 거치지 않았습니다. 실제 대응은 회사 SMS와 승인된 안전절차가 우선입니다. 문제가 9개뿐이라 반복하면 정답을 외우게 됩니다.</p>
 </main>
 <script>
-const DATA=[{"scenario": "AIS 위치정보 위조", "question": "타선 AIS와 레이더가 다르면?", "options": ["불일치를 무시한다", "레이더 등 독립 정보로 확인하고 당직 절차를 따른다", "AIS만 근거로 충돌회피한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "정보 유출 의심", "question": "민감정보 유출 징후가 보이면?", "options": ["증거 보존과 보고 체계를 따른다", "미확인 내용을 확정 발표한다", "로그를 삭제한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "서비스 가용성 저하", "question": "항만 서비스 장애가 의심되면?", "options": ["담당자 보고와 장애상태 기록을 진행한다", "모든 장비를 임의 재설정한다", "공격자부터 공표한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "GNSS 신호 교란", "question": "GNSS 교란 의심 시 올바른 대응은?", "options": ["독립 항법수단으로 교차 확인하고 SMS에 따라 보고한다", "GNSS 수치만으로 항로를 변경한다", "경보를 기록하지 않는다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "위성항법 위치정보 이상", "question": "위치정보가 불일치할 때 우선할 것은?", "options": ["전자해도만 신뢰한다", "독립된 항법자료와 비교하고 선장에게 보고한다", "임의로 센서를 재설정한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "무단 접근 의심", "question": "승인되지 않은 접근이 의심되면?", "options": ["타인의 계정으로 확인한다", "로그를 삭제한다", "접속기록 보존과 책임자 보고를 우선한다"], "answer_index": 2, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "악성코드 의심", "question": "악성코드 의심 발견 시 대응은?", "options": ["공격자를 즉시 단정한다", "담당자에게 보고하고 영향 범위를 안전하게 확인한다", "제어망을 임의 변경한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "피싱 메일 수신", "question": "의심스러운 첨부파일이 오면?", "options": ["공용 단말에 전달한다", "보낸 사람 이름만 믿고 실행한다", "열기 전에 보안 절차에 따라 신고·확인한다"], "answer_index": 2, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "랜섬웨어 의심", "question": "선내 업무망에서 랜섬웨어가 의심되면?", "options": ["승인된 사고대응 절차로 보고하고 증거를 보존한다", "모든 OT 장비 전원을 독단적으로 차단한다", "로그부터 삭제한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}];
+const DATA=[{"category": "ais_spoofing", "scenario": "AIS 위치정보 위조", "question": "타선 AIS와 레이더가 다르면?", "options": ["불일치를 무시한다", "레이더 등 독립 정보로 확인하고 당직 절차를 따른다", "AIS만 근거로 충돌회피한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "data_breach", "scenario": "정보 유출 의심", "question": "민감정보 유출 징후가 보이면?", "options": ["증거 보존과 보고 체계를 따른다", "미확인 내용을 확정 발표한다", "로그를 삭제한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "denial_of_service", "scenario": "서비스 가용성 저하", "question": "항만 서비스 장애가 의심되면?", "options": ["담당자 보고와 장애상태 기록을 진행한다", "모든 장비를 임의 재설정한다", "공격자부터 공표한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "gnss_jamming", "scenario": "GNSS 신호 교란", "question": "GNSS 교란 의심 시 올바른 대응은?", "options": ["독립 항법수단으로 교차 확인하고 SMS에 따라 보고한다", "GNSS 수치만으로 항로를 변경한다", "경보를 기록하지 않는다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "gnss_spoofing", "scenario": "위성항법 위치정보 이상", "question": "위치정보가 불일치할 때 우선할 것은?", "options": ["전자해도만 신뢰한다", "독립된 항법자료와 비교하고 선장에게 보고한다", "임의로 센서를 재설정한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "intrusion", "scenario": "무단 접근 의심", "question": "승인되지 않은 접근이 의심되면?", "options": ["타인의 계정으로 확인한다", "로그를 삭제한다", "접속기록 보존과 책임자 보고를 우선한다"], "answer_index": 2, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "malware", "scenario": "악성코드 의심", "question": "악성코드 의심 발견 시 대응은?", "options": ["공격자를 즉시 단정한다", "담당자에게 보고하고 영향 범위를 안전하게 확인한다", "제어망을 임의 변경한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "phishing", "scenario": "피싱 메일 수신", "question": "의심스러운 첨부파일이 오면?", "options": ["공용 단말에 전달한다", "보낸 사람 이름만 믿고 실행한다", "열기 전에 보안 절차에 따라 신고·확인한다"], "answer_index": 2, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"category": "ransomware", "scenario": "랜섬웨어 의심", "question": "선내 업무망에서 랜섬웨어가 의심되면?", "options": ["승인된 사고대응 절차로 보고하고 증거를 보존한다", "모든 OT 장비 전원을 독단적으로 차단한다", "로그부터 삭제한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}];
 const $=id=>document.getElementById(id);
+const WAVE=`<g class="sea" opacity=".9"><path d="M-20 235 q20-10 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V300 H-20Z" fill="#12406b"/><path d="M-20 250 q20-8 40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 t40 0 V300 H-20Z" fill="#0d3156"/></g>`;
+const SHIP=`<g class="ship"><path d="M130 215 H270 L250 240 H150Z" fill="#cfd9e6"/><rect x="170" y="190" width="60" height="25" fill="#e8f0fa"/><rect x="180" y="172" width="34" height="18" fill="#9fb3c8"/><rect x="186" y="177" width="8" height="8" fill="#4aa8ff"/><rect x="198" y="177" width="8" height="8" fill="#4aa8ff"/><rect x="207" y="150" width="5" height="22" fill="#9fb3c8"/></g>`;
+const T=(x,y,s,c="#e8f0fa",sz=13)=>`<text x="${x}" y="${y}" fill="${c}" font-size="${sz}" text-anchor="middle" font-weight="700">${s}</text>`;
+const SKY=`<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0a1a30"/><stop offset="1" stop-color="#1c3a5e"/></linearGradient></defs><rect width="400" height="300" fill="url(#sk)"/>`;
+const SC={
+ais_spoofing:()=>SKY+`<circle cx="200" cy="150" r="110" fill="#06210f" stroke="#2e7d4f" stroke-width="2"/><circle cx="200" cy="150" r="70" fill="none" stroke="#1f5a37"/><circle cx="200" cy="150" r="30" fill="none" stroke="#1f5a37"/><path class="sweep" d="M200 150 L200 40 A110 110 0 0 1 260 55Z" fill="#3ecf8e" opacity=".28"/><circle cx="150" cy="190" r="6" fill="#3ecf8e"/>${T(150,210,"레이더: 실제 위치","#3ecf8e",11)}<g class="jump"><circle cx="255" cy="105" r="7" fill="none" stroke="#ff6b6b" stroke-width="3"/>${T(255,92,"AIS: 타선 A","#ff6b6b",11)}</g>${T(200,30,"레이더 ≠ AIS","#ffb84a",16)}`,
+gnss_jamming:()=>SKY+`<g class="drift"><rect x="170" y="40" width="40" height="18" fill="#9fb3c8"/><rect x="150" y="45" width="16" height="8" fill="#4aa8ff"/><rect x="214" y="45" width="16" height="8" fill="#4aa8ff"/></g><g class="blink"><path d="M165 80 q35 25 70 0" stroke="#4aa8ff" fill="none" stroke-width="3"/><path d="M150 100 q50 40 100 0" stroke="#4aa8ff" fill="none" stroke-width="3"/></g><g class="blink2"><rect x="60" y="120" width="280" height="6" fill="#ff6b6b"/><rect x="90" y="132" width="220" height="6" fill="#ff6b6b" opacity=".6"/><rect x="40" y="144" width="320" height="6" fill="#ff6b6b" opacity=".4"/></g>${T(200,175,"GNSS 신호 약함 · 잡음 증가","#ffb84a",14)}${WAVE}<g class="jit">${SHIP}</g>${T(200,280,"위치 표시가 흔들림","#e8f0fa",12)}`,
+gnss_spoofing:()=>SKY+`<rect x="60" y="50" width="280" height="170" rx="10" fill="#0e2a47" stroke="#26405f"/><path d="M60 110 H340 M60 160 H340 M130 50 V220 M210 50 V220 M280 50 V220" stroke="#1d4672"/><circle cx="150" cy="170" r="7" fill="#3ecf8e"/>${T(150,192,"실제(센서·육안)","#3ecf8e",10)}<g class="jump"><circle cx="150" cy="170" r="7" fill="none" stroke="#ff6b6b" stroke-width="3"/>${T(150,152,"화면 표시 위치","#ff6b6b",10)}</g><path d="M155 168 L215 130" stroke="#ffb84a" stroke-dasharray="5 4" class="blink"/>${T(200,38,"위치정보 불일치","#ffb84a",15)}${WAVE}${SHIP}`,
+ransomware:()=>SKY+`<rect x="95" y="45" width="210" height="140" rx="10" fill="#0e1a2b" stroke="#4aa8ff" stroke-width="3"/><rect x="170" y="190" width="60" height="12" fill="#26405f"/><g class="pulse"><rect x="185" y="85" width="30" height="24" rx="4" fill="#ff6b6b"/><path d="M190 85 v-9 a10 10 0 0 1 20 0 v9" fill="none" stroke="#ff6b6b" stroke-width="4"/></g>${T(200,132,"파일 암호화 중…","#ff6b6b",14)}<rect x="125" y="148" width="150" height="10" rx="5" fill="#26405f"/><rect class="grow" x="125" y="148" width="150" height="10" rx="5" fill="#ff6b6b"/>${["130","160","190","220","250"].map((x,k)=>`<rect class="${k%2?"blink2":"blink"}" x="${x}" y="60" width="20" height="14" fill="#ffb84a"/>`).join("")}${T(200,240,"선내 업무망 PC","#9bb2cc",12)}${T(200,262,"네트워크 연결 상태 확인 필요","#ffb84a",12)}`,
+phishing:()=>SKY+`<g class="in"><rect x="110" y="80" width="180" height="120" rx="8" fill="#e8f0fa"/><path d="M110 80 L200 150 L290 80" fill="none" stroke="#7d8da3" stroke-width="3"/><rect x="235" y="150" width="42" height="34" rx="4" fill="#ffb84a"/>${T(256,172,".exe","#7a3b00",12)}</g><g class="pulse"><circle cx="300" cy="70" r="22" fill="#ff6b6b"/>${T(300,77,"!","#fff",22)}</g>${T(200,235,"보낸 사람이 낯설고 첨부파일이 수상함","#ffb84a",13)}${T(200,258,"열기 전에 확인","#e8f0fa",13)}`,
+intrusion:()=>SKY+`<clipPath id="cp"><rect x="75" y="50" width="250" height="170"/></clipPath><rect x="70" y="40" width="260" height="190" rx="10" fill="#07101c" stroke="#4aa8ff" stroke-width="3"/><g clip-path="url(#cp)"><g class="scr">${[0,1,2,3,4,5,6,7,8,9].map(k=>`<text x="85" y="${70+k*20}" fill="${k%3==0?"#ff6b6b":"#3ecf8e"}" font-size="11" font-family="monospace">${k%3==0?"LOGIN FAIL  user=admin  src=unknown":"login ok     user=crew01"}</text>`).join("")}</g></g><g class="blink"><circle cx="315" cy="55" r="7" fill="#ff6b6b"/></g>${T(200,255,"승인되지 않은 접근 시도 기록","#ffb84a",13)}${T(200,277,"기록을 지우지 말고 보존","#e8f0fa",12)}`,
+malware:()=>SKY+`${[[110,110],[200,80],[290,110],[150,190],[250,190]].map(([x,y],k)=>`<rect x="${x-22}" y="${y-16}" width="44" height="32" rx="5" fill="#0e2a47" stroke="${k<2?"#ff6b6b":"#4aa8ff"}" stroke-width="3" class="${k==2?"blink":k==3?"blink2":""}"/>`).join("")}<path d="M132 105 L178 85 M222 85 L268 105 M122 125 L145 175 M178 195 L228 195" stroke="#ff6b6b" stroke-dasharray="5 4" class="fade"/><g class="pulse"><circle cx="110" cy="110" r="10" fill="#ff6b6b"/></g>${T(200,40,"감염 의심 PC가 다른 PC로 퍼질 수 있음","#ffb84a",13)}${T(200,250,"먼저 네트워크에서 분리하고 보고","#e8f0fa",13)}`,
+denial_of_service:()=>SKY+`<rect x="165" y="95" width="70" height="110" rx="6" fill="#0e2a47" stroke="#4aa8ff" stroke-width="3"/>${[115,140,165].map(y=>`<rect x="175" y="${y}" width="50" height="14" rx="3" fill="#26405f"/><circle cx="215" cy="${y+7}" r="3" fill="#ff6b6b" class="blink"/>`).join("")}${[[40,80,"120px","20px"],[40,150,"120px","0px"],[40,220,"120px","-25px"],[360,80,"-120px","20px"],[360,150,"-120px","0px"],[360,220,"-120px","-25px"]].map(([x,y,dx,dy],k)=>`<circle class="${["fly","fly1","fly2"][k%3]}" style="--dx:${dx};--dy:${dy}" cx="${x}" cy="${y}" r="6" fill="#ffb84a"/>`).join("")}<rect x="120" y="225" width="160" height="12" rx="6" fill="#26405f"/><rect class="grow" x="120" y="225" width="160" height="12" rx="6" fill="#ff6b6b"/>${T(200,40,"요청이 몰려 응답 없음","#ffb84a",15)}${T(200,262,"서비스 부하 100%","#ff6b6b",12)}`,
+data_breach:()=>SKY+`<ellipse cx="120" cy="90" rx="42" ry="14" fill="#1d4672"/><rect x="78" y="90" width="84" height="80" fill="#1d4672"/><ellipse cx="120" cy="170" rx="42" ry="14" fill="#16375a"/><ellipse cx="120" cy="90" rx="42" ry="14" fill="#2c5f93"/>${T(120,135,"승무원·화물 정보","#e8f0fa",10)}${[0,1,2].map(k=>`<rect class="${["fly","fly1","fly2"][k]}" style="--dx:140px;--dy:-20px" x="165" y="${105+k*14}" width="20" height="26" rx="2" fill="#e8f0fa"/>`).join("")}<g class="blink2"><path d="M300 90 q-25 0-25 22 q0 24 28 24 h50 q22 0 22-20 q0-20-22-20 q-6-22-35-6Z" fill="#7d8da3"/>${T(317,120,"?","#0b1624",24)}</g>${T(200,40,"평소와 다른 곳으로 자료가 나감","#ffb84a",14)}${T(200,230,"무엇이 나갔는지 기록하고 보고","#e8f0fa",13)}`
+};
 let order,i,score,hp,combo,best;
 function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
 function start(){order=shuffle(DATA);i=0;score=0;hp=3;combo=0;best=0;show()}
 function hud(){$("hp").textContent="❤".repeat(hp)+"🖤".repeat(3-hp);$("sc").textContent="점수 "+score;$("cb").textContent=combo>1?"🔥 연속 "+combo:"문제 "+Math.min(i+1,order.length)+"/"+order.length}
 function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function sceneCard(cat){const c=el("div","card scene");const f=SC[cat];c.innerHTML=`<svg viewBox="0 0 400 300" role="img" aria-label="가상 상황 도식">${f?f():SKY}</svg>`;c.append(el("div","cap","가상 상황 도식(H) · 실제 사건을 재현한 것이 아님"));return c}
 function show(){hud();const st=$("stage");st.replaceChildren();
  if(hp<=0||i>=order.length)return end();
- const d=order[i],card=el("div","card");
+ const d=order[i],g=el("div","grid"),card=el("div","card");
  card.append(el("div","sc","상황: "+d.scenario),el("div","q",d.question));
  const opts=shuffle(d.options.map((t,k)=>({t,ok:k===d.answer_index})));
  const fb=el("div","fb");let done=false;
@@ -40,8 +77,8 @@ function show(){hud();const st=$("stage");st.replaceChildren();
   if(o.ok){b.classList.add("ok");combo++;best=Math.max(best,combo);score+=100+(combo-1)*20;fb.textContent="✅ 정답! "+d.rationale}
   else{b.classList.add("no");combo=0;hp--;[...card.querySelectorAll("button")].forEach((x,k)=>{if(opts[k].ok)x.classList.add("ok")});fb.textContent="❌ 오답. "+d.rationale}
   hud();const n=el("button","next",(hp<=0||i+1>=order.length)?"결과 보기":"다음 문제 ▶");n.onclick=()=>{i++;show()};card.append(n)};card.append(b)});
- card.append(fb);st.append(card)}
-function end(){const st=$("stage"),win=hp>0,max=order.length*100;
+ card.append(fb);g.append(sceneCard(d.category),card);st.append(g)}
+function end(){const st=$("stage"),win=hp>0;
  const r=score>=700?"S 노련한 선장":score>=450?"A 믿음직한 항해사":score>=200?"B 견습 항해사":"C 더 연습이 필요해요";
  const c=el("div","card");c.append(el("div","big",win?"🏆":"🌊"),el("div","q",win?"훈련 완료!":"훈련 중단 (하트 소진)"),
  el("div","",`점수 ${score} · 최고 연속 ${best} · 등급 ${r}`),el("div","fb","점수는 학습용 게임 점수이며 실제 대응 능력을 평가하지 않습니다."));
