@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>선장 대응 훈련</title>
+<style>
+:root{--bg:#0b1624;--card:#13243a;--line:#26405f;--tx:#e8f0fa;--mu:#9bb2cc;--ok:#3ecf8e;--no:#ff6b6b;--ac:#4aa8ff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.55 system-ui,"Malgun Gothic",sans-serif}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:8px 0}.badge{display:inline-block;font-size:12px;border:1px solid var(--ac);color:var(--ac);border-radius:99px;padding:2px 10px}
+.bar{display:flex;justify-content:space-between;gap:8px;margin:12px 0;font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin:12px 0}
+.sc{color:var(--ac);font-size:13px;font-weight:700}.q{font-size:20px;font-weight:700;margin:6px 0 14px}
+button{width:100%;text-align:left;background:#0f1d30;color:var(--tx);border:1px solid var(--line);border-radius:10px;padding:13px 14px;margin:8px 0;font:inherit;cursor:pointer}
+button:hover:not(:disabled){border-color:var(--ac)}button:disabled{cursor:default}
+.ok{border-color:var(--ok)!important;background:#12392c!important}.no{border-color:var(--no)!important;background:#3b1c24!important}
+.next{background:var(--ac);color:#04121f;text-align:center;font-weight:700;border:0}
+.fb{margin-top:10px;color:var(--mu);font-size:14px}.note{color:var(--mu);font-size:12px;margin-top:18px}
+.big{font-size:44px;text-align:center;margin:6px 0}
+</style></head><body><main>
+<h1>⚓ 선장 대응 훈련</h1><span class="badge">가상훈련(H) · 실제 사건 아님</span>
+<div class="bar"><span id="hp"></span><span id="sc"></span><span id="cb"></span></div>
+<div id="stage"></div>
+<p class="note">모든 문제는 코드에 고정된 9개 가상 훈련 문항입니다. 개별 사고에서 만든 것이 아니며 사실 확인·전문가 검수를 거치지 않았습니다. 실제 대응은 회사 SMS와 승인된 안전절차가 우선입니다. 문제가 9개뿐이라 반복하면 정답을 외우게 됩니다.</p>
+</main>
+<script>
+const DATA=[{"scenario": "AIS 위치정보 위조", "question": "타선 AIS와 레이더가 다르면?", "options": ["불일치를 무시한다", "레이더 등 독립 정보로 확인하고 당직 절차를 따른다", "AIS만 근거로 충돌회피한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "정보 유출 의심", "question": "민감정보 유출 징후가 보이면?", "options": ["증거 보존과 보고 체계를 따른다", "미확인 내용을 확정 발표한다", "로그를 삭제한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "서비스 가용성 저하", "question": "항만 서비스 장애가 의심되면?", "options": ["담당자 보고와 장애상태 기록을 진행한다", "모든 장비를 임의 재설정한다", "공격자부터 공표한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "GNSS 신호 교란", "question": "GNSS 교란 의심 시 올바른 대응은?", "options": ["독립 항법수단으로 교차 확인하고 SMS에 따라 보고한다", "GNSS 수치만으로 항로를 변경한다", "경보를 기록하지 않는다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "위성항법 위치정보 이상", "question": "위치정보가 불일치할 때 우선할 것은?", "options": ["전자해도만 신뢰한다", "독립된 항법자료와 비교하고 선장에게 보고한다", "임의로 센서를 재설정한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "무단 접근 의심", "question": "승인되지 않은 접근이 의심되면?", "options": ["타인의 계정으로 확인한다", "로그를 삭제한다", "접속기록 보존과 책임자 보고를 우선한다"], "answer_index": 2, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "악성코드 의심", "question": "악성코드 의심 발견 시 대응은?", "options": ["공격자를 즉시 단정한다", "담당자에게 보고하고 영향 범위를 안전하게 확인한다", "제어망을 임의 변경한다"], "answer_index": 1, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "피싱 메일 수신", "question": "의심스러운 첨부파일이 오면?", "options": ["공용 단말에 전달한다", "보낸 사람 이름만 믿고 실행한다", "열기 전에 보안 절차에 따라 신고·확인한다"], "answer_index": 2, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}, {"scenario": "랜섬웨어 의심", "question": "선내 업무망에서 랜섬웨어가 의심되면?", "options": ["승인된 사고대응 절차로 보고하고 증거를 보존한다", "모든 OT 장비 전원을 독단적으로 차단한다", "로그부터 삭제한다"], "answer_index": 0, "rationale": "회사 SMS 및 승인된 안전절차 우선. 실제 사건의 공격 경로로 단정하지 않음."}];
+const $=id=>document.getElementById(id);
+let order,i,score,hp,combo,best;
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]]}return a}
+function start(){order=shuffle(DATA);i=0;score=0;hp=3;combo=0;best=0;show()}
+function hud(){$("hp").textContent="❤".repeat(hp)+"🖤".repeat(3-hp);$("sc").textContent="점수 "+score;$("cb").textContent=combo>1?"🔥 연속 "+combo:"문제 "+Math.min(i+1,order.length)+"/"+order.length}
+function el(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
+function show(){hud();const st=$("stage");st.replaceChildren();
+ if(hp<=0||i>=order.length)return end();
+ const d=order[i],card=el("div","card");
+ card.append(el("div","sc","상황: "+d.scenario),el("div","q",d.question));
+ const opts=shuffle(d.options.map((t,k)=>({t,ok:k===d.answer_index})));
+ const fb=el("div","fb");let done=false;
+ opts.forEach(o=>{const b=el("button","",o.t);b.onclick=()=>{if(done)return;done=true;
+  [...card.querySelectorAll("button")].forEach(x=>x.disabled=true);
+  if(o.ok){b.classList.add("ok");combo++;best=Math.max(best,combo);score+=100+(combo-1)*20;fb.textContent="✅ 정답! "+d.rationale}
+  else{b.classList.add("no");combo=0;hp--;[...card.querySelectorAll("button")].forEach((x,k)=>{if(opts[k].ok)x.classList.add("ok")});fb.textContent="❌ 오답. "+d.rationale}
+  hud();const n=el("button","next",(hp<=0||i+1>=order.length)?"결과 보기":"다음 문제 ▶");n.onclick=()=>{i++;show()};card.append(n)};card.append(b)});
+ card.append(fb);st.append(card)}
+function end(){const st=$("stage"),win=hp>0,max=order.length*100;
+ const r=score>=700?"S 노련한 선장":score>=450?"A 믿음직한 항해사":score>=200?"B 견습 항해사":"C 더 연습이 필요해요";
+ const c=el("div","card");c.append(el("div","big",win?"🏆":"🌊"),el("div","q",win?"훈련 완료!":"훈련 중단 (하트 소진)"),
+ el("div","",`점수 ${score} · 최고 연속 ${best} · 등급 ${r}`),el("div","fb","점수는 학습용 게임 점수이며 실제 대응 능력을 평가하지 않습니다."));
+ const b=el("button","next","다시 도전");b.onclick=start;c.append(b);st.append(c);hud()}
+start();
+</script></body></html>
